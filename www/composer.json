@@ -1,0 +1,26 @@
+{
+    "name": "peter/testproject",
+    "authors": [
+        {
+            "name": "Peter"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Peter\\": "src/"
+        },
+        "files": [
+            "src/ParseTree/head.php",
+            "src/ParseTree/indexer.php",
+            "src/ParseTree/range.php",
+            "src/ParseTree/quote.php",
+            "src/ParseTree/routed.php"
+        ]
+    },
+
+    "require": {}
+}
