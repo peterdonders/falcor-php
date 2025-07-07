@@ -14,14 +14,20 @@
           document.write(response.json.greeting);
         });
 
-        model.
-        get("testME").
-        then(function(response) {
-          console.log(response.json);
-        });
+        //model.
+        //get("testME").
+        //then(function(response) {
+        //  console.log(response.json);
+        //});
+
+        //model2.
+        //get("todos[0..2]['name','done']").
+       //then(function(response) {
+        //  console.log(response);
+       // });
 
         model2.
-        get("todos[0..2]['name','done']").
+        get("todos.name").
         then(function(response) {
           console.log(response);
         });

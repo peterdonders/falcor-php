@@ -20,6 +20,7 @@ class FalcorRouter {
     }
 
     private function getMatchedRoute($paths) {
+		print_r($paths);
     	foreach($this->routes as $route) {
     		if($route->route == $paths[0][0]) {
     			return $route;

@@ -138,10 +138,25 @@ $route2->get = function($pathSet) {
 
 
 
+$route3 = new Route;
 
-$router = new Router(array($route, $route2));
+// match a request for the key "greeting"    
+$route3->route = "todos.name";
+// respond with a PathValue with the value of "Hello World."
+$route3->get = function() {
+    return ['name 1', 'name 2'];
+};
 
-//print_r($router);
 
 
 
+
+$router = new Router(array($route, $route2, $route3));
+
+print_r($router);
+
+$context = requestToContext($_REQUEST);
+
+print_r($context);
+
+echo  $router->{$context['method']}(json_encode($context['paths']));

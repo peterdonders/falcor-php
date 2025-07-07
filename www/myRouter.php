@@ -40,4 +40,8 @@ class Router {
         $this->maxPaths = MAX_PATHS;
     }
 
+    public function get($paths) {
+        return print_r($paths);
+    }
+
 }
