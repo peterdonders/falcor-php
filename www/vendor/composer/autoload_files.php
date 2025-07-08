@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     '6124b4c8570aa390c21fafd04a26c69f' => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+    'ad155f8f1cf0d418fe49e248db8c661b' => $vendorDir . '/react/promise/src/functions_include.php',
     'ec07570ca5a812141189b1fa81503674' => $vendorDir . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
     '36fff876235b6f4dd3621f36705bc238' => $baseDir . '/src/ParseTree/head.php',
     'ce5600e4ad131e2fcfea5ab0b932bb1e' => $baseDir . '/src/ParseTree/indexer.php',

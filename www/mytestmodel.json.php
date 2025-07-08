@@ -155,8 +155,14 @@ $router = new Router(array($route, $route2, $route3));
 
 print_r($router);
 
-$context = requestToContext($_REQUEST);
+$context = requestToContext();
 
-print_r($context);
+//print_r($context);
 
-echo  $router->{$context['method']}(json_encode($context['paths']));
+$obs = $router->{$context['method']}($context['paths']);
+
+$obs->subscribe(function($jsonGraphEnvelope) {
+    print_r($jsonGraphEnvelope);
+}, function($err) {
+            print_r($err);
+        });

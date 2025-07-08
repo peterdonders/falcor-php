@@ -9,8 +9,10 @@ include("convertTypes.php");
 function parseTree($routes) {
     
     $pTree = array();
-    $parseMap = (object)[];
+    $parseMap = [];
     foreach($routes as $route) {
+        // converts the virtual string path to a real path with
+        // extended syntax on.
         if (gettype($route->route) === 'string') {
             $route->prettyRoute = $route->route;
             $route->route = Parser::pathSyntax($route->route, true);
@@ -26,6 +28,10 @@ function parseTree($routes) {
         if (method_exists($route,'call')){
             $route->callId = 3;
         }
+
+        setHashOrThrowError($parseMap, $route);
+
+
         //buildParseTree($pTree, $route, 0, []);
     }
 
@@ -136,10 +142,10 @@ function decendTreeByRoutedToken($node, $value = null, $routeToken = null) {
         case ' keys':
         case ' integers':
         case ' ranges':
-            $next = $node[$value];
-            if (!$next) {
-                $next = $node[$value] = (object)[];
-            }
+            //$next = $node[$value];
+           // if (!$next) {
+                //$next = $node[$value] = (object)[];
+            //}
             break;
         default:
             break;
@@ -156,3 +162,93 @@ function decendTreeByRoutedToken($node, $value = null, $routeToken = null) {
 function actionWrapper() {
     return "a";
 }
+
+/**
+ * creates a hash of the virtual path where integers and ranges
+ * will collide but everything else is unique.
+ */
+function getHashesFromRoute($route, $depth = 0, $hashes = [], $hash = []) {
+  
+
+    $routeValue = $route[$depth];
+    $isArray = is_array($routeValue);
+    $length = $isArray && count($routeValue) || 0;
+    $idx = 0;
+
+
+    if (gettype($routeValue) === 'object' && !$isArray) {
+        $value = $routeValue->type;
+    }
+
+    else if (!$isArray) {
+        $value = $routeValue;
+    }
+
+    do {
+        if ($isArray) {
+            $value = $routeValue[$idx];
+        }
+
+        if ($value === Keys::integers || $value === Keys::ranges) {
+            $hash[$depth] = '__I__';
+        }
+
+        else if ($value === Keys::keys) {
+            $hash[$depth] ='__K__';
+        }
+
+        else {
+            $hash[$depth] = $value;
+        }
+
+        // recurse down the routed token
+        if ($depth + 1 !== count($route)) {
+            getHashesFromRoute($route, $depth + 1, $hashes, $hash);
+        }
+
+        // Or just add it to hashes
+        else {
+            $hashes[] = $hash;
+        }
+    } while ($isArray && ++$idx < $length);
+
+    return $hashes;
+}
+
+
+/**
+ * ensure that two routes of the same precedence do not get
+ * set in.
+ */
+function setHashOrThrowError($parseMap, $routeObject) {
+    $route = $routeObject->route;
+    //$get = $routeObject->get;
+    //$set = $routeObject->set;
+    //$call = $routeObject->call;
+
+
+    $hash = getHashesFromRoute($route);
+
+    print_r($hash);
+/*
+    .
+        map(function ($hash) { return $hash.join(','); }).
+        forEach(function ($hash) {
+            if (get && parseMap[hash + 'get'] ||
+                set && parseMap[hash + 'set'] ||
+                    call && parseMap[hash + 'call']) {
+                throw new Error(errors.routeWithSamePrecedence + ' ' +
+                               prettifyRoute(route));
+            }
+            if (get) {
+                parseMap[hash + 'get'] = true;
+            }
+            if (set) {
+                parseMap[hash + 'set'] = true;
+            }
+            if (call) {
+                parseMap[hash + 'call'] = true;
+            }
+        });*/
+}
+

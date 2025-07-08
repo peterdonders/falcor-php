@@ -8,6 +8,7 @@ class ComposerStaticInit82fd7c44f475b92a5f3037fbc585bee2
 {
     public static $files = array (
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
         '36fff876235b6f4dd3621f36705bc238' => __DIR__ . '/../..' . '/src/ParseTree/head.php',
         'ce5600e4ad131e2fcfea5ab0b932bb1e' => __DIR__ . '/../..' . '/src/ParseTree/indexer.php',
@@ -17,6 +18,12 @@ class ComposerStaticInit82fd7c44f475b92a5f3037fbc585bee2
     );
 
     public static $prefixLengthsPsr4 = array (
+        'R' => 
+        array (
+            'Rx\\' => 3,
+            'React\\Promise\\' => 14,
+            'React\\EventLoop\\' => 16,
+        ),
         'P' => 
         array (
             'PhpParser\\' => 10,
@@ -30,6 +37,18 @@ class ComposerStaticInit82fd7c44f475b92a5f3037fbc585bee2
     );
 
     public static $prefixDirsPsr4 = array (
+        'Rx\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/reactivex/rxphp/src',
+        ),
+        'React\\Promise\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/promise/src',
+        ),
+        'React\\EventLoop\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/react/event-loop/src',
+        ),
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
