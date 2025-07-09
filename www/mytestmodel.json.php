@@ -151,9 +151,9 @@ $route3->get = function() {
 
 
 
-$router = new Router(array($route, $route2, $route3));
+$router = new Router(array(/*$route, */$route2/*, $route3*/), ["debug" => true]);
 
-print_r($router);
+//print_r($router);
 
 $context = requestToContext();
 

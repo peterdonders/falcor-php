@@ -6,9 +6,12 @@ define('ROUTE_ID', -3);
 
 include("convertTypes.php");
 
+
+
+
 function parseTree($routes) {
     
-    $pTree = array();
+    $pTree = [];
     $parseMap = [];
     foreach($routes as $route) {
         // converts the virtual string path to a real path with
@@ -29,10 +32,16 @@ function parseTree($routes) {
             $route->callId = 3;
         }
 
-        setHashOrThrowError($parseMap, $route);
+        $parseMap = setHashOrThrowError($parseMap, $route);
+
+		
+		//print_r($route);
+        //$pTree = array_merge($pTree, buildParseTree($pTree, $route, 0));
+
+		print_r(buildParseTree($pTree, $route, 0));
 
 
-        //buildParseTree($pTree, $route, 0, []);
+		print_r($pTree);
     }
 
     
@@ -43,90 +52,196 @@ function parseTree($routes) {
     return $pTree;
 }
 
-function buildParseTree($node, $routeObject, $depth) {
+function buildParseTree2($node, $routeObject, $depth) {
+	$route = $routeObject->route;
+	$el = $route[$depth];
+	$isArray = is_array($el);
+	$i = 0;
 
-    $route = $routeObject->route;
-    $get =  method_exists($routeObject,'get');
-    $set = method_exists($routeObject,'set');
-    $call = method_exists($routeObject,'call');
-    $el = $route[$depth];
-
-   
-    $isArray = is_array($el);
-    $i = 0;
-    
-    do {
-        $value = $el;
-        $next  = (object)[];
+	do {
+		$value = $el;
         if ($isArray) {
             $value = $value[$i];
         }
 
-       
-
-        // There is a ranged token in this location with / without name.
+		// There is a ranged token in this location with / without name.
         // only happens from parsed path-syntax paths.
-        if (getType($value) === 'object') {
+        if (gettype($value) === 'object') {
             $routeType = $value->type;
-            $next = decendTreeByRoutedToken($node, $routeType, $value);
-        }
+            $next = decendTreeByRoutedToken($node, $value, $routeType);
+		}
 
-        // This is just a simple key.  Could be a ranged key.
-        else {
-            $next = decendTreeByRoutedToken($node, $value);
+		// This is just a simple key.  Could be a ranged key.
+		else {
+			$next = decendTreeByRoutedToken($node, $value);
 
-            
-
-            // we have to create a falcor-router virtual object
-            // so that the rest of the algorithm can match and coerse
-            // when needed.
-            if ($next) {
-                $route[$depth] = (object)[ 'type'=> $value, 'named' => false];
-            }
-            else {
+			// we have to create a falcor-router virtual object
+			// so that the rest of the algorithm can match and coerse
+			// when needed.
+			if ($next) {
+				$route[$depth] = ["type"=> $value, "named"=> false];
+			}
+			else {
                 if (!isset($node[$value])) {
-                    $node[$value] = (object)[];
+                    $node[$value] = [];
                 }
-                
+
+				
+				
                 $next = $node[$value];
-                
             }
         }
 
-        // Continue to recurse or put get/set.
+		 // Continue to recurse or put get/set.
         if ($depth + 1 === count($route)) {
+			
+			// Insert match into routeSyntaxTree
+            $matchObject = $next[Keys::match] ?? [];
             
-            // Insert match into routeSyntaxTree
-            $matchObject = isset($next->match) ? $next->match : (object)[];
-            
-            if (!isset($next->match)) {
-                $next->match = $matchObject;
+	
+			$matchObject['prettyRoute'] = $routeObject->prettyRoute;
+
+			
+
+			
+
+			if (!isset($next[Keys::match])) {
+                $next[Keys::match] = $matchObject;
             }
 
-            $matchObject->prettyRoute = $routeObject->prettyRoute;
+			$node[$value] = $next;
+
+		}
+		else {
+			
+			$next = buildParseTree($next, $routeObject, $depth + 1);
+			
+			
+		}
+		
+		
+		
+
+	} while ($isArray && ++$i < count($el));
+
+}
+
+
+function buildParseTree(&$node, $routeObject, $depth) {
+
+	$route = $routeObject->route;
+	$get =  method_exists($routeObject,'get');
+	$set = method_exists($routeObject,'set');
+	$call = method_exists($routeObject,'call');
+	$el = $route[$depth];
+
+	$isArray = is_array($el);
+	$i = 0;
+	
+
+	do {
+		$value = $el;
+		$next = null;
+        if ($isArray) {
+            $value = $value[$i];
+        }
+
+		// There is a ranged token in this location with / without name.
+        // only happens from parsed path-syntax paths.
+        if (gettype($value) === 'object') {
+			
+            $routeType = $value->type;
+            $next = decendTreeByRoutedToken($node, $value, $routeType);
+		}
+
+		// This is just a simple key.  Could be a ranged key.
+		else {
+			$next = decendTreeByRoutedToken($node, $value);
+
+			// we have to create a falcor-router virtual object
+			// so that the rest of the algorithm can match and coerse
+			// when needed.
+			if ($next) {
+				$route[$depth] = ["type"=> $value, "named"=> false];
+
+				if (!isset($node[$value])) {
+                    $node[$value] = [];
+                }
+                $next = $node[$value];
+			}
+			else {
+                if (!isset($node[$value])) {
+                    $node[$value] = [];
+                }
+
+				
+				
+                $next = $node[$value];
+            }
+        }
+
+		
+
+		 // Continue to recurse or put get/set.
+        if ($depth + 1 === count($route)) {
+			
+			// Insert match into routeSyntaxTree
+            $matchObject = $next[Keys::match] ?? [];
             
-            if ($get) {
-                $matchObject->get = actionWrapper($route, $get);
-                $matchObject->getId = $routeObject->getId;
+	
+			$matchObject['prettyRoute'] = $routeObject->prettyRoute;
+
+			
+
+			if ($get) {
+                $matchObject['get'] = actionWrapper($route, $get);
+                $matchObject['getId'] = $routeObject->getId;
             }
             if ($set) {
-                $matchObject->set = actionWrapper($route, $set);
-                $matchObject->setId = $routeObject->setId;
+                $matchObject['set'] = actionWrapper($route, $set);
+                $matchObject['setId'] = $routeObject->setId;
             }
             if ($call) {
-                $matchObject->call = actionWrapper($route, $call);
-                $matchObject->callId = $routeObject->callId;
+                $matchObject['call'] = actionWrapper($route, $call);
+                $matchObject['callId'] = $routeObject->callId;
             }
-        } else {
-            buildParseTree($next, $routeObject, $depth + 1);
-        }
 
-        
+			if (!isset($next[Keys::match])) {
+                $next[Keys::match] = $matchObject;
+            }
 
-    } while ($isArray && ++$i < count($el));
+			$node[$value] = $next;
+		}
+		else {
+			var_dump("run-buildParseTree agine");
+			buildParseTree($next, $routeObject, $depth + 1);
+			var_dump("dumpnext");
+			if (gettype($value) != 'object') {
+				print_r(value: $value);
+				
+			}
+			print_r($next);
+		}
 
+		
+		
+		
+		
+
+	} while ($isArray && ++$i < count($el));
+
+	
+
+	
+
+
+
+   
+   
     
 }
+
+
 
 /**
  * decends the rst and fills in any naming information at the node.
@@ -134,29 +249,29 @@ function buildParseTree($node, $routeObject, $depth) {
  * value will be null
  */
 function decendTreeByRoutedToken($node, $value = null, $routeToken = null) {
-    $next = null;
+	var_dump("decendTreeByRoutedToken");
+	
+	$next = null;
+	$canNext = false;
 
-    var_dump($node);
+	switch ($routeToken) {
+		case Keys::keys:
+		case Keys::integers:
+		case Keys::ranges:
+			$canNext = true;
+			break;
+		default:
+		break;
+	}
 
-    switch ($value) {
-        case ' keys':
-        case ' integers':
-        case ' ranges':
-            //$next = $node[$value];
-           // if (!$next) {
-                //$next = $node[$value] = (object)[];
-            //}
-            break;
-        default:
-            break;
-    }
-    if ($next && $routeToken) {
-        // matches the naming information on the node.
-        $next[' named'] = $routeToken->named;
-        $next[' name'] = $routeToken->name;
-    }
+	if ($canNext && $value) {
+		$next = [];
+		// matches the naming information on the node.
+		$next[Keys::named] = $value->named;
+		$next[Keys::name] = $value->name;
+	}
 
-    return $next;
+	return $next;
 }
 
 function actionWrapper() {
@@ -172,9 +287,11 @@ function getHashesFromRoute($route, $depth = 0, $hashes = [], $hash = []) {
 
     $routeValue = $route[$depth];
     $isArray = is_array($routeValue);
-    $length = $isArray && count($routeValue) || 0;
+    $length = 0;
+    if ($isArray) {
+        $length = count($routeValue);
+    }
     $idx = 0;
-
 
     if (gettype($routeValue) === 'object' && !$isArray) {
         $value = $routeValue->type;
@@ -188,6 +305,7 @@ function getHashesFromRoute($route, $depth = 0, $hashes = [], $hash = []) {
         if ($isArray) {
             $value = $routeValue[$idx];
         }
+        
 
         if ($value === Keys::integers || $value === Keys::ranges) {
             $hash[$depth] = '__I__';
@@ -201,9 +319,12 @@ function getHashesFromRoute($route, $depth = 0, $hashes = [], $hash = []) {
             $hash[$depth] = $value;
         }
 
+       
+
         // recurse down the routed token
         if ($depth + 1 !== count($route)) {
-            getHashesFromRoute($route, $depth + 1, $hashes, $hash);
+            $hashes[] = getHashesFromRoute($route, $depth + 1, $hashes, $hash);
+            
         }
 
         // Or just add it to hashes
@@ -212,7 +333,35 @@ function getHashesFromRoute($route, $depth = 0, $hashes = [], $hash = []) {
         }
     } while ($isArray && ++$idx < $length);
 
+    
+    
     return $hashes;
+}
+
+
+function implode_recursive(string $separator, array $array)
+{
+	return array_map(function($element) use($separator) {
+		$glue = [];
+		foreach($element as $value) {
+			if (gettype($value) == "array") {
+				if (gettype(current($value))  == "array") {
+					foreach($value as $b) {
+						$glue[] = implode($separator, $b);
+					}
+				}
+				else {
+					$glue[] = implode($separator, $value);
+				}
+			}
+			else {
+				$glue[] = $value;
+			}
+		}
+
+		return $glue;
+
+	}, $array);
 }
 
 
@@ -222,33 +371,77 @@ function getHashesFromRoute($route, $depth = 0, $hashes = [], $hash = []) {
  */
 function setHashOrThrowError($parseMap, $routeObject) {
     $route = $routeObject->route;
-    //$get = $routeObject->get;
-    //$set = $routeObject->set;
-    //$call = $routeObject->call;
+
+    $get = method_exists($routeObject,'get');
+    $set = method_exists($routeObject,'set');
+    $call = method_exists($routeObject,'call');
+
+    
 
 
-    $hash = getHashesFromRoute($route);
+	$hash = getHashesFromRoute($route);
+	
 
-    print_r($hash);
-/*
-    .
-        map(function ($hash) { return $hash.join(','); }).
-        forEach(function ($hash) {
-            if (get && parseMap[hash + 'get'] ||
-                set && parseMap[hash + 'set'] ||
-                    call && parseMap[hash + 'call']) {
-                throw new Error(errors.routeWithSamePrecedence + ' ' +
-                               prettifyRoute(route));
+    /*$hash1 = array_map(function($element) {
+        $glue = [];
+        foreach($element as $value) {
+           
+            if (gettype($value) == "array") {
+
+                if (gettype(current($value))  == "array") {
+                    foreach($value as $b) {
+                        $glue[] = implode(",", $b);
+                    }
+                }
+                else {
+                    $glue[] = implode(",", $value);
+                }
+
+                
             }
-            if (get) {
-                parseMap[hash + 'get'] = true;
+            else {
+                $glue[] = $value;
             }
-            if (set) {
-                parseMap[hash + 'set'] = true;
-            }
-            if (call) {
-                parseMap[hash + 'call'] = true;
-            }
-        });*/
+        }
+
+       
+
+        return $glue;
+
+    }, $hash);*/
+
+	$hash1 = implode_recursive(",", $hash);
+	//print_r($hash1[0]);
+	$hash2 = current($hash1);
+	
+	foreach($hash2 as $hashRoute) {
+		
+		if (
+			$get && isset($parseMap[$hashRoute . 'get']) ||
+			$set && isset($parseMap[$hashRoute . 'set']) ||
+			$call && isset($parseMap[$hashRoute . 'call'])
+		) {
+			throw new Exception(
+				'Two routes cannot have the same precedence or path.' .
+				' ' .
+				prettifyRoute($route)); 
+		}
+
+	
+
+		if ($get) {
+			$parseMap[$hashRoute . 'get'] = true;
+		}
+
+		if ($set) {
+			$parseMap[$hashRoute . 'set'] = true;
+		}
+
+		if ($call) {
+			$parseMap[$hashRoute . 'call'] = true;
+		}
+	}
+
+	return $parseMap;
 }
 

@@ -33,10 +33,10 @@ class Router {
     public $maxRefFollow;
     public $maxPaths;
 
-	public function __construct($routes, $options = new stdClass()) {
+	public function __construct($routes, array $options = []) {
 		$this->routes = $routes;
 		$this->rst = parseTree($routes);
-		$this->matcher = matcher($this->rst);
+		//$this->matcher = matcher($this->rst);
 		$this->setOptions($options);
 
 		$loop = Factory::create();
@@ -50,16 +50,27 @@ class Router {
 
 
 
-    private function setOptions($options) {
-        
-        //$this->debug = $options->debug;
-        //$this->pathErrorHook = ($options->hooks && $options->hooks->pathError) ?: $noOp;
-        //$this->errorHook = $options->hooks && $options->hooks->error;
-        //$this->methodSummaryHook = $options->hooks && $options->hooks->methodSummary;
-        //$this->now = ($options->hooks && $options->hooks->now) ?: $options->now ?: $defaultNow;
-        $this->maxRefFollow = MAX_REF_FOLLOW;
-        $this->maxPaths = MAX_PATHS;
-    }
+	private function setOptions(array $options) {
+
+		$noOp = function(){};
+		$defaultNow = function () {
+			return date("Y-m-d H:i:s");
+		};
+		
+		$opts = $options ?? [];
+
+		$this->debug = $opts['debug'] ?? false;
+		$this->pathErrorHook = $noOp;
+		//$this->pathErrorHook = $opts['hooks']['pathError'] ?? $noOp;
+		$this->errorHook = null;
+		//$this->errorHook = $opts['hooks']['error'] ?? null;
+		$this->methodSummaryHook = null;
+		//$this->methodSummaryHook = $opts['hooks']['methodSummary'] ?? null;
+		$this->now = $defaultNow;
+		//$this->now = $opts['hooks']['now'] ?: $opts['now'] ?: $defaultNow;
+		$this->maxRefFollow = $opts['maxRefFollow'] ?? MAX_REF_FOLLOW;
+		$this->maxPaths = $opts['maxPaths'] ?? MAX_PATHS;
+	}
 
 	private function normalize($range) {
 		$from = $range->from || 0;

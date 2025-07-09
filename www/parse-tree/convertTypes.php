@@ -8,13 +8,13 @@ function convertTypes($virtualPath) {
         if (getType($key) === 'object' && $key !== null && !is_array($key)) {
             switch ($key->type) {
                 case 'keys':
-                    $key->type = ' keys';
+                    $key->type = 'keys';
                     break;
                 case 'integers':
-                    $key->type = ' integers';
+                    $key->type = 'integers';
                     break;
                 case 'ranges':
-                    $key->type = ' ranges';
+                    $key->type = 'ranges';
                     break;
                 default:
                     throw new Error('Unknown route type.');
