@@ -3,7 +3,9 @@
 define("PREFIX", chr((int) 80));
 
 include ("./operations/matcher.php");
+include "./run/recurseMatchAndExecute.php";
 include("./router/get.php");
+
 
 use PhpParser\Node\Expr\Cast\Object_;
 
@@ -36,7 +38,7 @@ class Router {
 	public function __construct($routes, array $options = []) {
 		$this->routes = $routes;
 		$this->rst = parseTree($routes);
-		//$this->matcher = matcher($this->rst);
+		$this->matcher = matcher($this->rst);
 		$this->setOptions($options);
 
 		$loop = Factory::create();
@@ -45,6 +47,8 @@ class Router {
 		Scheduler::setDefaultFactory(function() use($loop){
     		return new Scheduler\EventLoopScheduler($loop);
 		});
+
+		$loop->run();
 
     }
 

@@ -26,8 +26,14 @@
         //  console.log(response);
        // });
 
-        model2.
-        get("todos.name").
+        //model2.
+        //get("todos.name").
+        //then(function(response) {
+        //  console.log(response);
+        //});
+
+         model2.
+        get(["titlesById[1]['rating']", "titlesById[1]['userRating']"]).
         then(function(response) {
           console.log(response);
         });

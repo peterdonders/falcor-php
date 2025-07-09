@@ -12,8 +12,8 @@ FalcorEndpoint.dataSourceRoute = function(getDataSource) {
         var obs;
         var dataSource = getDataSource(req, res);
         var context = requestToContext(req);
-        console.log("dataSource");
-        console.log(dataSource);
+        //console.log("dataSource");
+        //console.log(dataSource);
         // probably this should be sanity check function?
         if (Object.keys(context).length === 0) {
             return res.status(500).send("Request not supported");
@@ -25,7 +25,7 @@ FalcorEndpoint.dataSourceRoute = function(getDataSource) {
             return res.status(500).send("Data source does not implement the requested method");
         }
 
-        console.log(dataSource[context.method]);
+        //console.log(dataSource[context.method]);
         //console.log([].concat(context.paths));
 
         if (context.method === "set") {

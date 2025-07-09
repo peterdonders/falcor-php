@@ -9,24 +9,24 @@ app.use(
     "/model.json",
     falcorExpress.dataSourceRoute(function (req, res) {
         var router = new Router([
-            {
+            //{
                 // match a request for the key 'greeting'
-                route: "greeting",
+               // route: "greeting",
                 // respond with a PathValue with the value of 'Hello World.'
-                get: () => ({ path: ["greeting"], value: "Hello World" }),
-            },
+                //get: () => ({ path: ["greeting"], value: "Hello World" }),
+            //},
             {
-                route: "genrelist[{integers:indices}].name",
+                route: "titlesById[{integers:titleIds}]['userRating', 'rating']",
                 get: () => ({ path: ["greeting"], value: "Hello World" }),
-                call: () => ({ path: ["greeting"], value: "Hello World" }),
+                //call: () => ({ path: ["greeting"], value: "Hello World" }),
             },
-            {
-                route: 'todos.name',
-                get: function(pathSet) {
-                    return { path: ["todos", "name"], value: ['name1', 'name2'] };
-                }
+           // {
+              //  route: 'todos.name',
+              //  get: function(pathSet) {
+              //      return { path: ["todos", "name"], value: ['name1', 'name2'] };
+              //  }
         
-            }
+            //}
         ]);
 
         var routes = router._routes;

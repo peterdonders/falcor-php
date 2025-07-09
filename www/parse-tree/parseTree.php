@@ -38,10 +38,11 @@ function parseTree($routes) {
 		//print_r($route);
         //$pTree = array_merge($pTree, buildParseTree($pTree, $route, 0));
 
-		print_r(buildParseTree($pTree, $route, 0));
+		//print_r(buildParseTree($pTree, $route, 0));
+		buildParseTree($pTree, $route, 0);
 
 
-		print_r($pTree);
+		
     }
 
     
@@ -52,79 +53,6 @@ function parseTree($routes) {
     return $pTree;
 }
 
-function buildParseTree2($node, $routeObject, $depth) {
-	$route = $routeObject->route;
-	$el = $route[$depth];
-	$isArray = is_array($el);
-	$i = 0;
-
-	do {
-		$value = $el;
-        if ($isArray) {
-            $value = $value[$i];
-        }
-
-		// There is a ranged token in this location with / without name.
-        // only happens from parsed path-syntax paths.
-        if (gettype($value) === 'object') {
-            $routeType = $value->type;
-            $next = decendTreeByRoutedToken($node, $value, $routeType);
-		}
-
-		// This is just a simple key.  Could be a ranged key.
-		else {
-			$next = decendTreeByRoutedToken($node, $value);
-
-			// we have to create a falcor-router virtual object
-			// so that the rest of the algorithm can match and coerse
-			// when needed.
-			if ($next) {
-				$route[$depth] = ["type"=> $value, "named"=> false];
-			}
-			else {
-                if (!isset($node[$value])) {
-                    $node[$value] = [];
-                }
-
-				
-				
-                $next = $node[$value];
-            }
-        }
-
-		 // Continue to recurse or put get/set.
-        if ($depth + 1 === count($route)) {
-			
-			// Insert match into routeSyntaxTree
-            $matchObject = $next[Keys::match] ?? [];
-            
-	
-			$matchObject['prettyRoute'] = $routeObject->prettyRoute;
-
-			
-
-			
-
-			if (!isset($next[Keys::match])) {
-                $next[Keys::match] = $matchObject;
-            }
-
-			$node[$value] = $next;
-
-		}
-		else {
-			
-			$next = buildParseTree($next, $routeObject, $depth + 1);
-			
-			
-		}
-		
-		
-		
-
-	} while ($isArray && ++$i < count($el));
-
-}
 
 
 function buildParseTree(&$node, $routeObject, $depth) {
@@ -165,12 +93,14 @@ function buildParseTree(&$node, $routeObject, $depth) {
 				$route[$depth] = ["type"=> $value, "named"=> false];
 
 				if (!isset($node[$value])) {
+					
                     $node[$value] = [];
                 }
                 $next = $node[$value];
 			}
 			else {
                 if (!isset($node[$value])) {
+				
                     $node[$value] = [];
                 }
 
@@ -213,17 +143,26 @@ function buildParseTree(&$node, $routeObject, $depth) {
 			$node[$value] = $next;
 		}
 		else {
-			var_dump("run-buildParseTree agine");
+			//var_dump("run-buildParseTree agine");
 			buildParseTree($next, $routeObject, $depth + 1);
-			var_dump("dumpnext");
-			if (gettype($value) != 'object') {
-				print_r(value: $value);
-				
+			
+			
+			if (is_string($value) ) {
+				$node[$value] = $next;
 			}
-			print_r($next);
+			else {
+				$node = $next;
+			}
+			
+			//var_dump("dumpnext");
+			//if (gettype($value) != 'object') {
+			//	print_r(value: $value);
+			//	
+			//}
+			//print_r($next);
 		}
 
-		
+		//print_r($node);
 		
 		
 		
@@ -249,7 +188,7 @@ function buildParseTree(&$node, $routeObject, $depth) {
  * value will be null
  */
 function decendTreeByRoutedToken($node, $value = null, $routeToken = null) {
-	var_dump("decendTreeByRoutedToken");
+	//var_dump("decendTreeByRoutedToken");
 	
 	$next = null;
 	$canNext = false;

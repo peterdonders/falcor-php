@@ -7,6 +7,8 @@ use React\EventLoop\Factory;
 use Rx\Scheduler;
 
 
+
+
 // Placeholder for runGetAction
 function runGetAction($router, &$jsongCache, $methodSummary) {
     // Simulate some action
@@ -17,7 +19,7 @@ function runGetAction($router, &$jsongCache, $methodSummary) {
 }
 
 // Placeholder for recurseMatchAndExecute
-function recurseMatchAndExecute($matcher, $action, $normPS, $method, $router, &$jsongCache) {
+/*function recurseMatchAndExecute($matcher, $action, $normPS, $method, $router, &$jsongCache) {
     // This function would simulate the core routing logic
     // For now, it returns a simple structure. In a real scenario, this would
     // involve complex matching and execution against the router's routes.
@@ -27,7 +29,7 @@ function recurseMatchAndExecute($matcher, $action, $normPS, $method, $router, &$
         'missing' => [],
         'unhandledPaths' => []
     ];
-}
+}*/
 
 // Placeholder for normalizePathSets
 function normalizePathSets($paths) {
@@ -178,6 +180,7 @@ trait Get {
      */
     public function get(array $paths): Observable
     {
+
         $router = $this; // Reference to the current router instance
 
         return rxNewToRxNewAndOld(Observable::defer(function () use ($router, $paths) {
@@ -198,7 +201,7 @@ trait Get {
                 $normPS = normalizePathSets($paths);
 
                 // For debugging, in a real scenario you'd use a proper logger
-                // echo "Action created.\n";
+                 echo "Action created.\n";
 
                 if (getPathsCount($normPS) > $router->maxPaths) {
                     throw new MaxPathsExceededError();
@@ -209,7 +212,7 @@ trait Get {
                     // Turn it (jsongGraph, invalidations, missing, etc.) into a
                     // jsonGraph envelope
                     flatMap(function ($details) use ($router, $paths, &$methodSummary) {
-                        // echo "Details from recurseMatchAndExecute: " . json_encode($details) . "\n";
+                         echo "Details from recurseMatchAndExecute: " . json_encode($details) . "\n";
                         $out = [
                             'jsonGraph' => $details->jsonGraph
                         ];

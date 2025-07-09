@@ -11,13 +11,13 @@
             });
 
             // retrieve the "greeting" key from the root of the Virtual JSON resource
-            model.get("greeting").then(function (response) {
-                document.write(response.json.greeting);
-            });
-
-            //model.get("todos.name").then(function (response) {
-            //    console.log(response.json.todos.name);
+            //model.get("greeting").then(function (response) {
+            //    document.write(response.json.greeting);
             //});
+
+            model.get(["titlesById[1]['rating']", "titlesById[1]['userRating']"]).then(function (response) {
+                console.log(response.json);
+            });
         </script>
     </head>
     <body></body>
