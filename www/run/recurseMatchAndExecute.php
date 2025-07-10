@@ -180,12 +180,16 @@ function _recurseMatchAndExecute(
     $reportedPaths = [];
     $currentMethod = $method;
 
-	$source = Observable::fromArray($paths);
+    
 
-	$source
-    ->flatMap(static fn (array $items) => Observable::fromArray($items))
-    ->do(static fn (int $item) => print_r(sprintf('Item: %d', $item)))
-    ->subscribe();
+	$a = Observable::
+
+        // Each pathSet (some form of collapsed path) need to be sent
+        // independently.  for each collapsed pathSet will, if producing
+        // refs, be the highest likelihood of collapsibility.
+        fromArray($paths);
+
+        print_r($a);
 
 return [];
 
