@@ -213,8 +213,36 @@ function decendTreeByRoutedToken($node, $value = null, $routeToken = null) {
 	return $next;
 }
 
-function actionWrapper() {
-    return "a";
+function actionWrapper($route, $action) {
+
+	return function($matchedPath) use ($route, $action) {
+		$convertedArguments;
+        $len = -1;
+        //$restOfArgs = slice(arguments, 1);
+        $isJSONObject = !is_array($matchedPath);
+
+		// A set uses a json object
+        if ($isJSONObject) {
+            //restOfArgs = [];
+            $convertedArguments = $matchedPath;
+        }
+
+		 // Could be an array of pathValues for a set operation.
+        else if (isPathValue($matchedPath[0])) {
+            $convertedArguments = [];
+
+			foreach($matchedPath as $pV) {
+            	$pV->path = convertPathToRoute($pV->path, $route);
+                $convertedArguments[++$len] = $pV;
+            }
+        }
+
+		 // else just convert and assign
+        else {
+            $convertedArguments = convertPathToRoute($matchedPath, $route);
+        }
+        return $action.apply($this, [$convertedArguments].concat($restOfArgs));
+	};
 }
 
 /**

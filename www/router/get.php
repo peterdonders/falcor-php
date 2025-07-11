@@ -213,8 +213,9 @@ trait Get {
                     // jsonGraph envelope
                     flatMap(function ($details) use ($router, $paths, &$methodSummary) {
                          echo "Details from recurseMatchAndExecute: " . json_encode($details) . "\n";
+                        
                         $out = [
-                            'jsonGraph' => $details->jsonGraph
+                            'jsonGraph' => $details['jsonGraph']
                         ];
 
                         // If the unhandledPaths are present then we need to

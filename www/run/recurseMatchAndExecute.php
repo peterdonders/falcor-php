@@ -156,6 +156,15 @@ function mergeCacheAndGatherRefsAndInvalidations(array &$jsongCache, array $valu
     ];
 }
 
+function asString($value) {
+    if (is_array($value)) {
+        return json_encode($value);
+    } elseif (is_bool($value)) {
+        return (string)(integer)$value;
+    }
+    return (string) $value;
+}
+
 /**
  * De PHP-vertaling van de JavaScript-functie `_recurseMatchAndExecute`.
  * @param callable $match Functie die paden matcht met routes.
@@ -180,6 +189,19 @@ function _recurseMatchAndExecute(
     $reportedPaths = [];
     $currentMethod = $method;
 
+    $createStdoutObserver = function ($prefix = '') {
+    return new Rx\Observer\CallbackObserver(
+        function ($value) use ($prefix) { 
+            var_dump($value);
+            echo $prefix . "Next value: " . asString($value) . "\n"; 
+        },
+        function ($error) use ($prefix) { echo $prefix . "Exception: " . $error->getMessage() . "\n"; },
+        function ()       use ($prefix) { echo $prefix . "Complete!\n"; }
+    );
+};
+
+$stdoutObserver = $createStdoutObserver();
+
     
 
 	$a = Observable::
@@ -188,10 +210,41 @@ function _recurseMatchAndExecute(
         // independently.  for each collapsed pathSet will, if producing
         // refs, be the highest likelihood of collapsibility.
         fromArray($paths);
+        $a->map(function ($nextPaths) use($match, $currentMethod) {
 
-        print_r($a);
+            if (!count($nextPaths)) {
+                return Observable::empty();
+            }
 
-return [];
+            $result = $match($currentMethod, $nextPaths);
+
+            if (isset($result['error'])) {
+                return Observable::error(new Exception($result['error']));
+            }
+
+            $matchedResults = $result;
+
+           var_dump($matchedResults);
+
+            return $result;
+
+			//return []
+
+        })
+        //->subscribe($stdoutObserver);
+		 ->subscribe(function ($v) {
+			print_r($v);
+			
+    });
+
+        //print_r($a);
+
+        return [
+            'unhandledPaths' => $unhandledPaths,
+            'invalidated' => $invalidated,
+            'jsonGraph' => [],
+            'reportedPaths' => $reportedPaths,
+        ];
 
 	/*foreach($paths as $nextPaths) {
 		print_r($nextPaths);

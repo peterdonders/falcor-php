@@ -161,8 +161,14 @@ $context = requestToContext();
 
 $obs = $router->{$context['method']}($context['paths']);
 
-$obs->subscribe(function($jsonGraphEnvelope) {
-    print_r($jsonGraphEnvelope);
-}, function($err) {
-            print_r($err);
-        });
+$obs->subscribe(
+	function($jsonGraphEnvelope) {
+		echo json_encode($jsonGraphEnvelope);
+		//print_r($jsonGraphEnvelope);
+	},
+	function($err) {
+		echo json_encode($err);
+	}
+);
+
+$router->runLoop();

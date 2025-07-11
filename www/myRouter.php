@@ -35,6 +35,8 @@ class Router {
     public $maxRefFollow;
     public $maxPaths;
 
+	protected $loop;
+
 	public function __construct($routes, array $options = []) {
 		$this->routes = $routes;
 		$this->rst = parseTree($routes);
@@ -45,14 +47,15 @@ class Router {
 
 		//You only need to set the default scheduler once
 		Scheduler::setDefaultFactory(function() use($loop){
-    		return new Scheduler\EventLoopScheduler($loop);
+			return new Scheduler\EventLoopScheduler($loop);
 		});
 
-		$loop->run();
+		$this->loop = $loop;
+	}
 
-    }
-
-
+	public function runLoop() {
+		$this->loop->run();
+	}
 
 	private function setOptions(array $options) {
 
