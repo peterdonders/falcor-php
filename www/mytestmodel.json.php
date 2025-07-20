@@ -8,6 +8,10 @@ include ("route.php");
 include "myRouter.php";
 use Peter\Parser;
 
+function error($errorValue) {
+    return [ '$type' => "error", "value"=> $errorValue ];
+}
+
 /*
 
 
@@ -114,7 +118,6 @@ function dataSourceRoute() {
 
 
 
-//print_r(dataSourceRoute()); 
 
 $route = new Route;
 
@@ -133,7 +136,43 @@ $route2 = new Route;
 $route2->route = "titlesById[{integers:titleIds}]['userRating', 'rating']";
 // respond with a PathValue with the value of "Hello World."
 $route2->get = function($pathSet) {
-    return "Hello World";
+	$titleKeys = $pathSet[2];
+	$response = [];
+	$jsonGraphResponse = $response['jsonGraph'] = [];
+	$titlesById = $jsonGraphResponse['titlesById'] = [];
+	foreach($pathSet['titleIds'] as $titleId) {
+		$responseTitle = [
+			[
+				"userRating" => 1,
+				"rating" => 2
+			],
+			[
+				"userRating" => 3,
+				"rating" => 4
+			],
+			[
+				"userRating" => 5,
+				"rating" => 6
+			],
+			[
+				"userRating" => 7,
+				"rating" => 8
+			]
+		];
+
+		$title = [];
+		if (isset($responseTitle['error'])) {
+			$titlesById[$titleId] = error($responseTitle['error']);
+		}
+		else {
+			// going through each of the matched keys
+			// ["name"] or ["year"] or ["name", "year"]
+			foreach($titleKeys as $key) {
+				$title[$key] = $responseTitle[$key];
+			}
+			$titlesById[$titleId] = $title;
+		}
+	}
 };
 
 
@@ -144,27 +183,28 @@ $route3 = new Route;
 $route3->route = "todos.name";
 // respond with a PathValue with the value of "Hello World."
 $route3->get = function() {
-    return ['name 1', 'name 2'];
+    return ["path"=> ["todos.name"], "value"=> "Hello World" ];
+
 };
 
 
 
+/*
 
 
-$router = new Router(array($route, $route2, $route3), ["debug" => true]);
 
-//print_r($router);
 
-$context = requestToContext();
 
-//print_r($context);
+
+
+
 
 $obs = $router->{$context['method']}($context['paths']);
 
 $obs->subscribe(
 	function($jsonGraphEnvelope) {
 		echo json_encode($jsonGraphEnvelope);
-		//print_r($jsonGraphEnvelope);
+		
 	},
 	function($err) {
 		echo json_encode($err);
@@ -172,3 +212,24 @@ $obs->subscribe(
 );
 
 $router->runLoop();
+*/
+
+$context = requestToContext();
+
+
+$router = new Router(array($route, $route2, $route3), ["debug" => true]);
+$obs = $router->{$context['method']}($context['paths']);
+$obs->subscribe(
+	function($jsonGraphEnvelope) {
+		echo "end";
+		//echo json_encode($jsonGraphEnvelope);
+		print_r($jsonGraphEnvelope);
+	},
+	function($err) {
+		echo json_encode($err);
+	}
+);
+
+
+$router->runLoop();
+

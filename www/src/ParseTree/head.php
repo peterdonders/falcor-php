@@ -18,8 +18,8 @@ function head($tokenizer) {
 
         switch ($token->type) {
             case 'token':
-                /*var_dump(+$token->token[0]);
-                var_dump(is_numeric(+$token->token[0]));
+                /*
+               
                 if (is_numeric($token->token[0])) {
                     echo "a";
                     

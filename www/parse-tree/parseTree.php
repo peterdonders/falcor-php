@@ -35,10 +35,7 @@ function parseTree($routes) {
         $parseMap = setHashOrThrowError($parseMap, $route);
 
 		
-		//print_r($route);
-        //$pTree = array_merge($pTree, buildParseTree($pTree, $route, 0));
-
-		//print_r(buildParseTree($pTree, $route, 0));
+		
 		buildParseTree($pTree, $route, 0);
 
 
@@ -124,15 +121,15 @@ function buildParseTree(&$node, $routeObject, $depth) {
 			
 
 			if ($get) {
-                $matchObject['get'] = actionWrapper($route, $get);
+                $matchObject['get'] = actionWrapper($route, $routeObject->get);
                 $matchObject['getId'] = $routeObject->getId;
             }
             if ($set) {
-                $matchObject['set'] = actionWrapper($route, $set);
+                $matchObject['set'] = actionWrapper($route, $routeObject->set);
                 $matchObject['setId'] = $routeObject->setId;
             }
             if ($call) {
-                $matchObject['call'] = actionWrapper($route, $call);
+                $matchObject['call'] = actionWrapper($route, $routeObject->call);
                 $matchObject['callId'] = $routeObject->callId;
             }
 
@@ -143,7 +140,7 @@ function buildParseTree(&$node, $routeObject, $depth) {
 			$node[$value] = $next;
 		}
 		else {
-			//var_dump("run-buildParseTree agine");
+
 			buildParseTree($next, $routeObject, $depth + 1);
 			
 			
@@ -154,15 +151,10 @@ function buildParseTree(&$node, $routeObject, $depth) {
 				$node = $next;
 			}
 			
-			//var_dump("dumpnext");
-			//if (gettype($value) != 'object') {
-			//	print_r(value: $value);
-			//	
-			//}
-			//print_r($next);
+			
 		}
 
-		//print_r($node);
+		
 		
 		
 		
@@ -188,7 +180,7 @@ function buildParseTree(&$node, $routeObject, $depth) {
  * value will be null
  */
 function decendTreeByRoutedToken($node, $value = null, $routeToken = null) {
-	//var_dump("decendTreeByRoutedToken");
+	
 	
 	$next = null;
 	$canNext = false;
@@ -213,12 +205,61 @@ function decendTreeByRoutedToken($node, $value = null, $routeToken = null) {
 	return $next;
 }
 
-function actionWrapper($route, $action) {
+function isPathValue($x) {
+    return false;
+}
 
+function convertPathToRoute($path, $route) {
+	$matched = [];
+	// Always use virtual path since path can be longer since
+	// it contains suffixes.
+	for ($i = 0, $len = count($route); $i < $len; ++$i) {
+		if(isset($route[$i]['type'])) {
+			echo "TODO convertPathToRoute";
+			/*
+			 var virt = route[i];
+            switch (virt.type) {
+                case Keys.ranges:
+                    matched[i] =
+                        convertPathKeyToRange(path[i]);
+                    break;
+                case Keys.integers:
+                    matched[i] =
+                        convertPathKeyToIntegers(path[i]);
+                    break;
+                case Keys.keys:
+                    matched[i] =
+                        convertPathKeyToKeys(path[i]);
+                    break;
+                default:
+                    throw new Error('Unknown route type.');
+            }
+            if (virt.named) {
+                matched[virt.name] = matched[matched.length - 1];
+            }
+				*/
+		}
+
+		// Dealing with specific keys or array of specific keys.
+		// If route has an array at this position, arrayify the
+		// path[i] element.
+		else {
+			if (is_array($route[$i]) && !is_array($path[$i])) {
+                $matched[] = [$path[$i]];
+            }
+			else {
+                $matched[] = $path[$i];
+            }
+		}
+    }
+
+    return $matched;
+}
+
+function actionWrapper($route, $action) {
 	return function($matchedPath) use ($route, $action) {
-		$convertedArguments;
         $len = -1;
-        //$restOfArgs = slice(arguments, 1);
+		$restOfArgs = array_slice(func_get_args(), 1);
         $isJSONObject = !is_array($matchedPath);
 
 		// A set uses a json object
@@ -241,7 +282,11 @@ function actionWrapper($route, $action) {
         else {
             $convertedArguments = convertPathToRoute($matchedPath, $route);
         }
-        return $action.apply($this, [$convertedArguments].concat($restOfArgs));
+
+		return call_user_func(
+			$action, 
+			array_merge($convertedArguments, $restOfArgs));
+
 	};
 }
 
@@ -378,7 +423,7 @@ function setHashOrThrowError($parseMap, $routeObject) {
     }, $hash);*/
 
 	$hash1 = implode_recursive(",", $hash);
-	//print_r($hash1[0]);
+	
 	$hash2 = current($hash1);
 	
 	foreach($hash2 as $hashRoute) {
@@ -391,7 +436,9 @@ function setHashOrThrowError($parseMap, $routeObject) {
 			throw new Exception(
 				'Two routes cannot have the same precedence or path.' .
 				' ' .
-				prettifyRoute($route)); 
+				//prettifyRoute($route)
+				$route
+			); 
 		}
 
 	

@@ -4,7 +4,7 @@ include ("FalcorRouter.php");
 include ("route.php");
 include ("testRoute.php");
 
-//print_r($_REQUEST);
+
 
 
 //header('Content-Type: application/json; charset=UTF-8');
@@ -42,10 +42,10 @@ $router = new FalcorRouter($routerArray);
 
 $path = $_GET['paths'];
 $paths = json_decode($path);
-print_r($paths);
+
 $myRoute = $router->get($paths);
 
-//print_r($myRoute );
+
 $obj1 = new stdClass;
 $obj1->greeting = "Hello World";
 

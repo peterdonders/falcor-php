@@ -33,7 +33,7 @@
         //});
 
          model2.
-        get(["titlesById[1]['rating']", "titlesById[1]['userRating']"]).
+        get(["titlesById[0..2]['rating']", "titlesById[0..2]['userRating']"]).
         then(function(response) {
           console.log(response);
         });

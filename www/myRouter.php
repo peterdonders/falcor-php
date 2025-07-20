@@ -3,18 +3,21 @@
 define("PREFIX", chr((int) 80));
 
 include ("./operations/matcher.php");
+include "./operations/strip/stripPath.php";
+include "./operations/matcher/intersection/hasIntersection.php";
+include "./precedence/runByPrecedence.php";
 include "./run/recurseMatchAndExecute.php";
 include("./router/get.php");
+include("parse-tree/parseTree.php");
+include("pathSyntax/path-syntax.php");
 
 
-use PhpParser\Node\Expr\Cast\Object_;
 
 use Rx\Observable;
 use React\EventLoop\Factory;
 use Rx\Scheduler;
 
-include("parse-tree/parseTree.php");
-include("pathSyntax/path-syntax.php");
+
 
 define("MAX_REF_FOLLOW", 50);
 define("MAX_PATHS", 9000);
@@ -128,9 +131,7 @@ class Router {
 	}
 	
 	private function getAction($matchAndPath, $jsongCache, $methodSummary) {
-		//print_r($matchAndPath);
-		//print_r($jsongCache);
-		//print_r($methodSummary);
+		
 	}
 
 	private function recurseMatchAndExecute($match, $actionRunner, $paths,$method, $routerInstance, $jsongCache) {
@@ -152,8 +153,7 @@ class Router {
 				try {
 					$matchedResults = $match($currentMethod, $nextPaths);
 				}  catch (Exception $error) {
-					//print_r($error);
-					//return Observable.throw(e);
+					
 					return Observable::empty();
 				}
 
@@ -165,7 +165,7 @@ class Router {
 				}
 
 				echo "nn";
-				//print_r($nextPaths);
+
 			}
 		);
 		return $source;
@@ -178,7 +178,7 @@ class Router {
 		$jsongCache = (object) array();
 		$action = $this->runGetAction($jsongCache, $methodSummary);
 		$normPS = $this->normalizePathSets($paths);
-		print_r($action);
+		
 
 		if ($this->getPathsCount($normPS) > $this->maxPaths) {
 			//throw new MaxPathsExceededError();
@@ -192,16 +192,16 @@ class Router {
 			$this, 
 			$jsongCache
 		)->flatMap(function ($i) {
-			print_r($i);
+			
 		})->subscribe(function ($v) {
         echo $v . PHP_EOL;
     });
 
-		print_r($a);
+		
 
 
 		
-        return print_r($paths);
+        
     }*/
 
 
